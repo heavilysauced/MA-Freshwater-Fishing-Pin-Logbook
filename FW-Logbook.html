@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C1F1C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Angler Log">
+<title>MA Angler of the Year Logbook</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap');
+* { box-sizing: border-box; margin: 0; }
+body {
+  background: #122A26; color: #EDE7D6; min-height: 100vh;
+  font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+  padding-bottom: 70px;
+}
+header {
+  padding: max(26px, env(safe-area-inset-top)) 18px 18px;
+  border-bottom: 3px double #C9A227;
+  background: linear-gradient(180deg, #0C1F1C 0%, #122A26 100%);
+}
+.eyebrow { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #C9A227; font-weight: 700; }
+h1 { font-family: 'Zilla Slab', Georgia, serif; font-weight: 700; font-size: 30px; margin: 6px 0 2px; line-height: 1.1; }
+.sub { font-size: 14px; color: #9DB8AF; }
+.toggle-row { display: flex; gap: 8px; margin-top: 16px; }
+.toggle-row button {
+  flex: 1; padding: 9px 0; border-radius: 6px; font-size: 13px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; font-family: inherit; cursor: pointer;
+  border: 1px solid #2E4B45; background: transparent; color: #9DB8AF; transition: all .15s;
+}
+.toggle-row button.active { border-color: #C9A227; background: #C9A227; color: #122A26; }
+section { padding: 16px 14px 4px; }
+.progress-row { display: flex; align-items: baseline; gap: 10px; padding: 4px 4px 0; }
+.big-count { font-family: 'Zilla Slab', Georgia, serif; font-size: 52px; font-weight: 700; color: #C9A227; line-height: 1; }
+.progress-label { font-size: 15px; color: #9DB8AF; }
+.bar { height: 10px; background: #0C1F1C; border-radius: 6px; margin: 10px 4px 0; overflow: hidden; border: 1px solid #2E4B45; }
+.bar > div { height: 100%; background: linear-gradient(90deg, #8C6D1F, #C9A227, #E8C558); border-radius: 6px; transition: width .4s; }
+.champ { margin: 10px 4px 0; padding: 12px; background: #C9A227; color: #122A26; border-radius: 8px; font-weight: 700; text-align: center; }
+.section-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #9DB8AF; font-weight: 700; margin: 0 4px 10px; }
+.board { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+@media (min-width: 560px) { .board { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 860px) { .board { grid-template-columns: repeat(4, 1fr); } }
+.chip {
+  text-align: left; padding: 10px 12px; border-radius: 8px; border: 1px solid #B8A375;
+  background: #DFCCA3; color: #1E1A10; min-height: 90px; font-family: inherit; cursor: pointer;
+}
+.chip.earned { border-color: #C9A227; background: linear-gradient(135deg, #EAD9A6, #D9C49A); }
+.chip .name-row { display: flex; align-items: center; gap: 6px; }
+.chip .pin {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  border: 1px dashed #9B8A63; background: transparent;
+}
+.chip.earned .pin {
+  border: 1px solid #8C6D1F;
+  background: radial-gradient(circle at 35% 30%, #F2D678, #C9A227 55%, #7A5C13);
+  box-shadow: 0 1px 3px rgba(0,0,0,.35);
+}
+.chip .sp-name { font-family: 'Zilla Slab', Georgia, serif; font-weight: 600; font-size: 14.5px; line-height: 1.15; }
+.chip .mins { font-size: 11.5px; color: #6B5E42; margin-top: 6px; line-height: 1.45; }
+.chip .rec { font-size: 10.5px; color: #8C6D1F; margin-top: 5px; line-height: 1.4; }
+.chip .best { font-size: 11px; margin-top: 4px; color: #7A6E52; font-weight: 600; }
+.chip.earned .best { color: #7A5C13; }
+.fine { font-size: 11px; color: #5F7D74; margin: 8px 6px 0; }
+.cta {
+  width: 100%; padding: 14px 0; border-radius: 8px; border: none; cursor: pointer;
+  background: #C9A227; color: #122A26; font-weight: 700; font-size: 16px;
+  font-family: 'Zilla Slab', Georgia, serif;
+}
+.form-card { background: #183530; border: 1px solid #2E4B45; border-radius: 10px; padding: 6px 16px 16px; }
+.form-head { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.form-head h2 { font-family: 'Zilla Slab', Georgia, serif; font-weight: 700; font-size: 19px; }
+.close-x { background: none; border: none; color: #9DB8AF; font-size: 22px; line-height: 1; padding: 4px; cursor: pointer; }
+label { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #9DB8AF; margin: 12px 0 5px; font-weight: 600; }
+input, select, textarea {
+  width: 100%; background: #0C1F1C; border: 1px solid #2E4B45; color: #EDE7D6;
+  border-radius: 6px; padding: 10px 12px; font-size: 16px; font-family: inherit;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid #C9A227; outline-offset: 1px; border-color: #C9A227; }
+.pair { display: flex; gap: 8px; }
+.cat-row { display: flex; gap: 8px; }
+.cat-row button {
+  flex: 1; padding: 10px 4px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  border: 1px solid #2E4B45; background: #0C1F1C; color: #9DB8AF; font-family: inherit;
+}
+.cat-row button.active { border-color: #C9A227; background: #2A3A20; color: #E8C558; }
+.err { color: #E07856; font-size: 12px; margin-top: 4px; }
+.info-box { margin-top: 8px; font-size: 13px; color: #9DB8AF; background: #0C1F1C; border-radius: 6px; padding: 8px 10px; border: 1px solid #2E4B45; }
+.info-box .rec-line { margin-top: 6px; padding-top: 6px; border-top: 1px solid #2E4B45; color: #C9A227; }
+.info-box .photo-note { margin-top: 4px; color: #E8C558; }
+.entry { background: #183530; border: 1px solid #2E4B45; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+.entry.qualified { border-color: #C9A227; }
+.entry .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.entry .sp { font-family: 'Zilla Slab', Georgia, serif; font-weight: 700; font-size: 16.5px; }
+.badge {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 20px; background: #0C1F1C; color: #9DB8AF; border: 1px solid #2E4B45;
+}
+.badge.gold { background: #C9A227; color: #122A26; border: none; }
+.entry .metric { font-size: 13.5px; margin-top: 6px; }
+.entry .where { font-size: 12.5px; color: #9DB8AF; margin-top: 3px; }
+.entry .notes { font-size: 12.5px; color: #9DB8AF; margin-top: 4px; font-style: italic; }
+.deadline { font-size: 12px; margin-top: 6px; font-weight: 600; color: #E8C558; }
+.deadline.urgent { color: #E07856; }
+.record-banner {
+  font-size: 12.5px; margin-top: 6px; padding: 6px 10px; background: #3A2F0E;
+  border: 1px solid #C9A227; border-radius: 6px; color: #F2D678; font-weight: 700;
+}
+.entry .actions { margin-top: 8px; }
+.link-btn { background: none; color: #5F7D74; border: none; padding: 0; font-size: 12px; text-decoration: underline; cursor: pointer; font-family: inherit; }
+.danger-btn { background: #7A2E1D; color: #EDE7D6; border: none; border-radius: 5px; padding: 5px 12px; font-size: 12px; font-weight: 700; margin-right: 8px; cursor: pointer; font-family: inherit; }
+.ghost-btn { background: none; color: #9DB8AF; border: 1px solid #2E4B45; border-radius: 5px; padding: 5px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+.empty { text-align: center; padding: 28px 16px; color: #5F7D74; font-size: 14px; border: 1px dashed #2E4B45; border-radius: 10px; }
+.backup-row { display: flex; gap: 8px; margin-top: 12px; }
+.backup-row button, .backup-row label.file-label {
+  flex: 1; padding: 10px 0; border-radius: 6px; border: 1px solid #2E4B45; background: #0C1F1C;
+  color: #9DB8AF; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  text-align: center; text-transform: none; letter-spacing: normal; margin: 0;
+}
+footer { padding: 18px 18px 8px; font-size: 12.5px; color: #5F7D74; line-height: 1.6; border-top: 1px solid #2E4B45; margin-top: 12px; }
+footer strong { color: #9DB8AF; }
+.saved-flash { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #C9A227; color: #122A26; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .25s; pointer-events: none; }
+.saved-flash.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">MassWildlife · Sportfishing Awards · <span id="yr"></span></div>
+  <h1>Angler of the Year Logbook</h1>
+  <div class="sub">All 24 species. One season. Earn your pins.</div>
+  <div class="toggle-row">
+    <button id="btnAdult" onclick="setDivision('adult')">Adult</button>
+    <button id="btnYouth" onclick="setDivision('youth')">Youth (under 18)</button>
+  </div>
+</header>
+
+<section>
+  <div class="progress-row">
+    <span class="big-count" id="count">0</span>
+    <span class="progress-label">of 24 species pinned</span>
+  </div>
+  <div class="bar"><div id="barFill" style="width:0%"></div></div>
+  <div id="champ"></div>
+</section>
+
+<section>
+  <div class="section-label">Pin board — tap a species to log it</div>
+  <div class="board" id="board"></div>
+  <div class="fine">*Sunfish includes bluegill, pumpkinseed, redbreast, green sunfish &amp; rock bass</div>
+</section>
+
+<section id="formSection">
+  <button class="cta" id="openFormBtn" onclick="openForm()">+ Log a catch</button>
+  <div class="form-card" id="formCard" style="display:none">
+    <div class="form-head">
+      <h2>Log a catch</h2>
+      <button class="close-x" onclick="closeForm()" aria-label="Close form">&times;</button>
+    </div>
+    <label for="fSpecies">Species</label>
+    <select id="fSpecies" onchange="renderInfoBox()"></select>
+    <div class="err" id="errSpecies" style="display:none">Choose a species to log this catch.</div>
+
+    <label>Category</label>
+    <div class="cat-row">
+      <button id="catRelease" onclick="setCategory('release')">Catch &amp; Release (length)</button>
+      <button id="catKeep" onclick="setCategory('keep')">Catch &amp; Keep (weight)</button>
+    </div>
+
+    <div id="weightFields" style="display:none">
+      <label>Certified weight</label>
+      <div class="pair">
+        <input type="number" inputmode="numeric" min="0" placeholder="lb" id="fLb">
+        <input type="number" inputmode="decimal" min="0" max="15.9" placeholder="oz" id="fOz">
+      </div>
+      <div class="err" id="errWeight" style="display:none">Enter the weight from a certified scale.</div>
+    </div>
+    <div id="lengthFields">
+      <label>Total length (inches)</label>
+      <input type="number" inputmode="decimal" min="0" step="0.25" placeholder="e.g. 18" id="fLen">
+      <div class="err" id="errLen" style="display:none">Enter the measured length.</div>
+    </div>
+
+    <div class="info-box" id="infoBox" style="display:none"></div>
+
+    <label for="fDate">Date caught</label>
+    <input type="date" id="fDate">
+    <label for="fWater">Water body</label>
+    <input type="text" id="fWater" placeholder="e.g. Quabbin Reservoir">
+    <label for="fTown">Town</label>
+    <input type="text" id="fTown" placeholder="e.g. Belchertown">
+    <label for="fNotes">Notes (bait, weather, witness…)</label>
+    <textarea id="fNotes" rows="2" placeholder="Optional"></textarea>
+
+    <button class="cta" style="margin-top:16px" onclick="saveCatch()">Save to logbook</button>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">Catch log · <span id="logCount">0 entries</span></div>
+  <div id="log"></div>
+  <div class="backup-row">
+    <button onclick="exportBackup()">⬇ Export backup</button>
+    <label class="file-label">⬆ Import backup<input type="file" accept=".json" style="display:none" onchange="importBackup(event)"></label>
+  </div>
+</section>
+
+<footer>
+  <strong>Remember the official rules:</strong> submit each affidavit to MassWildlife within 30 days of the catch (December catches by Jan 10). Keep entries need a certified scale + witness; release entries need a photo of the whole fish on a labeled measuring device, released on the spot. Lengths round <em>up</em> to the nearest ¼″. Public waters only — private ponds don't count. Possible state records must be weighed whole by a MassWildlife Fisheries Biologist. This logbook tracks your progress; official entries go through mass.gov.
+  <br><br>Entries are saved on this device in your browser. Use "Export backup" now and then in case you clear your browser data or switch phones.
+</footer>
+
+<div class="saved-flash" id="savedFlash">Saved ✓</div>
+
+<script>
+// ── MassWildlife requirements: keepOz = min weight in total ounces, relIn = min length ──
+const SPECIES = [
+  { id: "bowfin", name: "Bowfin", keepOz: { adult: 96, youth: 64 }, relIn: { adult: 26, youth: 20 } },
+  { id: "brook", name: "Brook Trout", keepOz: { adult: 32, youth: 16 }, relIn: { adult: 16, youth: 14 } },
+  { id: "brown", name: "Brown Trout", keepOz: { adult: 64, youth: 32 }, relIn: { adult: 22, youth: 18 } },
+  { id: "bullhead", name: "Bullhead", keepOz: { adult: 32, youth: 16 }, relIn: { adult: 15, youth: 12 }, topPhoto: true },
+  { id: "carp", name: "Carp", keepOz: { adult: 240, youth: 160 }, relIn: { adult: 31, youth: 27 } },
+  { id: "pickerel", name: "Chain Pickerel", keepOz: { adult: 72, youth: 48 }, relIn: { adult: 25, youth: 20 } },
+  { id: "channelcat", name: "Channel Catfish", keepOz: { adult: 96, youth: 80 }, relIn: { adult: 25, youth: 20 }, topPhoto: true },
+  { id: "crappie", name: "Crappie", keepOz: { adult: 24, youth: 16 }, relIn: { adult: 14, youth: 11 } },
+  { id: "fallfish", name: "Fallfish", keepOz: { adult: 12, youth: 8 }, relIn: { adult: 15, youth: 12 } },
+  { id: "laker", name: "Lake Trout", keepOz: { adult: 112, youth: 80 }, relIn: { adult: 30, youth: 25 } },
+  { id: "llsalmon", name: "Landlocked Salmon", keepOz: { adult: 64, youth: 48 }, relIn: { adult: 22, youth: 18 } },
+  { id: "lmb", name: "Largemouth Bass", keepOz: { adult: 112, youth: 64 }, relIn: { adult: 21, youth: 18 } },
+  { id: "pike", name: "Northern Pike", keepOz: { adult: 240, youth: 160 }, relIn: { adult: 36, youth: 28 } },
+  { id: "rainbow", name: "Rainbow Trout", keepOz: { adult: 48, youth: 32 }, relIn: { adult: 20, youth: 16 } },
+  { id: "shad", name: "Shad", keepOz: { adult: 80, youth: 48 }, relIn: { adult: 22, youth: 18 } },
+  { id: "smb", name: "Smallmouth Bass", keepOz: { adult: 72, youth: 48 }, relIn: { adult: 20, youth: 17 } },
+  { id: "sunfish", name: "Sunfish*", keepOz: { adult: 12, youth: 8 }, relIn: { adult: 10, youth: 8 } },
+  { id: "tigermusky", name: "Tiger Muskellunge", keepOz: { adult: 160, youth: 112 }, relIn: { adult: 34, youth: 26 } },
+  { id: "tigertrout", name: "Tiger Trout", keepOz: { adult: 32, youth: 16 }, relIn: { adult: 16, youth: 12 } },
+  { id: "walleye", name: "Walleye", keepOz: { adult: 64, youth: 32 }, relIn: { adult: 24, youth: 18 } },
+  { id: "whitecat", name: "White Catfish", keepOz: { adult: 64, youth: 32 }, relIn: { adult: 19, youth: 15 }, topPhoto: true },
+  { id: "whitesucker", name: "White Sucker", keepOz: { adult: 32, youth: 16 }, relIn: { adult: 19, youth: 16 } },
+  { id: "whiteperch", name: "White Perch", keepOz: { adult: 24, youth: 16 }, relIn: { adult: 14, youth: 11 } },
+  { id: "yellowperch", name: "Yellow Perch", keepOz: { adult: 24, youth: 16 }, relIn: { adult: 14, youth: 11 } },
+];
+
+// ── Massachusetts state records (MassWildlife official list) ──
+const RECORDS = {
+  shad: { keep: { lb: 11, oz: 4, angler: "Bob Thibodo", water: "Connecticut River", year: 1986 }, rel: { len: 25, angler: "Paul Beauchesne, Jr.", water: "Chicopee River, Granby", year: 2017 } },
+  bowfin: { keep: { lb: 9, oz: 10, angler: "Andrew Langley", water: "Taunton River", year: 2020 }, rel: { len: 32, angler: "David DeSimone", water: "Oxbow Pond, Easthampton", year: 2021 } },
+  brook: { keep: { lb: 10, oz: 0, angler: "Peter Harand", water: "Ashfield Lake", year: 2008 }, rel: { len: 20.75, angler: "David DeSimone", water: "Swift River, Belchertown", year: 2021 } },
+  brown: { keep: { lb: 19, oz: 10, angler: "Dana Deblois", water: "Wachusett Reservoir", year: 1966 }, rel: { len: 32, angler: "David DeSimone", water: "Littleville Reservoir, Huntington", year: 2020 } },
+  bullhead: { keep: { lb: 6, oz: 4, angler: "Roger Aziz, Jr.", water: "Forest Lake, Methuen", year: 2008 }, rel: { len: 23, angler: "Robert Savino", water: "Indian Hill Reservoir, Newbury", year: 2026 } },
+  carp: { keep: { lb: 46, oz: 5, angler: "Shane Felch", water: "Quinsigamond Lake, Shrewsbury", year: 2012 }, rel: { len: 44, angler: "Kenneth Langdon", water: "Connecticut River, South Hadley", year: 2021 } },
+  pickerel: { keep: { lb: 9, oz: 5, angler: "Mrs. James Martin", water: "Laurel Lake, Lee", year: 1954 }, rel: { len: 32.5, angler: "Nicholas Gurney", water: "Bog Pond, Carver", year: 2023 } },
+  channelcat: { keep: { lb: 26, oz: 8, angler: "Dana Dodge", water: "Ashfield Lake", year: 1989 }, rel: { len: 34.75, angler: "Cam Tucker", water: "Connecticut River, Gill", year: 2023 } },
+  crappie: { keep: { lb: 4, oz: 10, angler: "James Crowley", water: "Jake's Pond, Plymouth", year: 1980 }, rel: { len: 18.25, angler: "M. Menard / T. Melanson (tie)", water: "Lashaway Lake / Putnamville Res.", year: 2024 } },
+  fallfish: { keep: { lb: 2, oz: 2, angler: "Cam Tucker", water: "Millers River, Montague", year: 2024 }, rel: { len: 19, angler: "Ryker Leslie", water: "Connecticut River, Northfield", year: 2024 } },
+  laker: { keep: { lb: 25, oz: 7, angler: "William Roy", water: "Quabbin Reservoir", year: 2016 }, rel: { len: 39, angler: "John Stamas", water: "Wachusett Reservoir", year: 2024 } },
+  llsalmon: { keep: { lb: 10, oz: 2, angler: "Richard Gagne", water: "Wachusett Reservoir", year: 1985 }, rel: { len: 27.5, angler: "Colin Duarte", water: "Wachusett Reservoir", year: 2024 } },
+  lmb: { keep: { lb: 15, oz: 8, angler: "Walter Bolonis", water: "Sampson Pond, Carver", year: 1975 }, rel: { len: 25, angler: "4-way tie", water: "Mashpee-Wakeby, Moores & White Ponds", year: 2025 } },
+  pike: { keep: { lb: 35, oz: 0, angler: "Don Greenwood, Jr.", water: "Quacumquasit Pond, Brookfield", year: 1988 }, rel: { len: 45.5, angler: "A. DePaoli / C. Strong (tie)", water: "Onota Lake, Pittsfield", year: 2021 } },
+  rainbow: { keep: { lb: 13, oz: 13, angler: "Jeffrey Greco", water: "Wachusett Reservoir", year: 1999 }, rel: { len: 27.25, angler: "David DeSimone", water: "Swift River, Belchertown", year: 2021 } },
+  smb: { keep: { lb: 8, oz: 2, angler: "Barbara Sasen", water: "Wachusett Reservoir", year: 1991 }, rel: { len: 23.5, angler: "Zachary Aquino", water: "Wachusett Reservoir", year: 2020 } },
+  sunfish: { keep: { lb: 2, oz: 1, angler: "Heather Bulger", water: "South Athol Pond, Athol", year: 1982 }, rel: { len: 13, angler: "Griffin Sabolevski", water: "Wrights Reservoir, Westminster", year: 2021 } },
+  tigermusky: { keep: { lb: 27, oz: 0, angler: "James Lambert", water: "Pontoosuc Lake, Pittsfield", year: 2001 }, rel: { len: 34, angler: "David DeSimone", water: "Pontoosuc Lake, Lanesborough", year: 2021 } },
+  tigertrout: { keep: { lb: 9, oz: 7, angler: "Michael Shelton", water: "Peter's Pond, Sandwich", year: 2004 }, rel: { len: 25.5, angler: "David DeSimone", water: "Ashfield Pond, Ashfield", year: 2021 } },
+  walleye: { keep: { lb: 11, oz: 0, angler: "Robert Methot", water: "Quabbin Reservoir", year: 1973 }, rel: { len: 29.5, angler: "M. Taylor / J. Wingrove (tie)", water: "Connecticut River", year: 2022 } },
+  whitecat: { keep: { lb: 9, oz: 3, angler: "Michael Payne", water: "Baddacook Pond, Groton", year: 1987 }, rel: { len: 30, angler: "John Truitt", water: "Connecticut River, Deerfield", year: 2018 } },
+  whitesucker: { keep: { lb: 3, oz: 12, angler: "Kathy Flagg", water: "Millers River, Erving", year: 2024 }, rel: { len: 23.5, angler: "Cam Tucker", water: "Millers River, Montague", year: 2025 } },
+  whiteperch: { keep: { lb: 3, oz: 8, angler: "Val Percuoco", water: "Wachusett Reservoir", year: 2016 }, rel: { len: 18, angler: "P. Dukuly / J. Ceccolini (tie)", water: "Wachusett Reservoir", year: 2022 } },
+  yellowperch: { keep: { lb: 2, oz: 12, angler: "James O'Conner", water: "South Watuppa Pond, Fall River", year: 1979 }, rel: { len: 16.75, angler: "William McCarthy", water: "Laurel Lake, Lee", year: 2025 } },
+};
+
+const KEY = "ma-angler-tracker-v1";
+let state = { division: "adult", catches: [] };
+let category = "release";
+let confirmDeleteId = null;
+
+// ── persistence ──
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.catches)) state.catches = data.catches;
+      if (data.division === "adult" || data.division === "youth") state.division = data.division;
+    }
+  } catch (e) { /* fresh logbook */ }
+}
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+    flash();
+  } catch (e) {
+    alert("Couldn't save — your browser storage may be full or blocked. Try exporting a backup.");
+  }
+}
+function flash() {
+  const el = document.getElementById("savedFlash");
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 1200);
+}
+
+// ── helpers ──
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function fmtWeight(oz) {
+  const lb = Math.floor(oz / 16), rem = Math.round((oz % 16) * 10) / 10;
+  if (lb === 0) return rem + " oz";
+  if (rem === 0) return lb + " lb";
+  return lb + " lb " + rem + " oz";
+}
+function todayISO() {
+  const d = new Date(), off = d.getTimezoneOffset();
+  return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
+}
+function qualifies(c, div) {
+  const sp = SPECIES.find(s => s.id === c.speciesId);
+  if (!sp) return false;
+  if (c.category === "keep") return c.totalOz != null && c.totalOz >= sp.keepOz[div];
+  return c.lengthIn != null && c.lengthIn >= sp.relIn[div];
+}
+function beatsRecord(c) {
+  const r = RECORDS[c.speciesId];
+  if (!r) return false;
+  if (c.category === "keep") return c.totalOz != null && c.totalOz > r.keep.lb * 16 + r.keep.oz;
+  return c.lengthIn != null && c.lengthIn > r.rel.len;
+}
+function daysLeft(dateStr) {
+  if (!dateStr) return null;
+  const deadline = new Date(new Date(dateStr + "T00:00:00").getTime() + 30 * 86400000);
+  return Math.ceil((deadline - new Date()) / 86400000);
+}
+
+// ── actions ──
+function setDivision(d) { state.division = d; save(); render(); }
+function setCategory(c) {
+  category = c;
+  document.getElementById("catRelease").classList.toggle("active", c === "release");
+  document.getElementById("catKeep").classList.toggle("active", c === "keep");
+  document.getElementById("weightFields").style.display = c === "keep" ? "" : "none";
+  document.getElementById("lengthFields").style.display = c === "release" ? "" : "none";
+  renderInfoBox();
+}
+function openForm(speciesId) {
+  document.getElementById("openFormBtn").style.display = "none";
+  document.getElementById("formCard").style.display = "";
+  if (speciesId) document.getElementById("fSpecies").value = speciesId;
+  if (!document.getElementById("fDate").value) document.getElementById("fDate").value = todayISO();
+  renderInfoBox();
+  document.getElementById("formSection").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function closeForm() {
+  document.getElementById("formCard").style.display = "none";
+  document.getElementById("openFormBtn").style.display = "";
+  clearForm();
+}
+function clearForm() {
+  ["fSpecies", "fLb", "fOz", "fLen", "fWater", "fTown", "fNotes"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("fDate").value = todayISO();
+  ["errSpecies", "errWeight", "errLen"].forEach(id => document.getElementById(id).style.display = "none");
+  renderInfoBox();
+}
+function renderInfoBox() {
+  const spId = document.getElementById("fSpecies").value;
+  const box = document.getElementById("infoBox");
+  const sp = SPECIES.find(s => s.id === spId);
+  if (!sp) { box.style.display = "none"; return; }
+  const div = state.division;
+  const min = category === "keep" ? fmtWeight(sp.keepOz[div]) : sp.relIn[div] + '&Prime; total length';
+  let html = 'Bronze pin minimum (' + div + '): ' + min;
+  const r = RECORDS[spId];
+  if (r) {
+    const recTxt = category === "keep"
+      ? r.keep.lb + ' lb ' + r.keep.oz + ' oz — ' + esc(r.keep.angler) + ', ' + esc(r.keep.water) + ' (' + r.keep.year + ')'
+      : r.rel.len + '&Prime; — ' + esc(r.rel.angler) + ', ' + esc(r.rel.water) + ' (' + r.rel.year + ')';
+    html += '<div class="rec-line">🏅 State record (' + (category === "keep" ? "keep" : "release") + '): ' + recTxt + '</div>';
+  }
+  if (sp.topPhoto) html += '<div class="photo-note">📷 Catfish/bullhead entries also need a top-view photo.</div>';
+  box.innerHTML = html;
+  box.style.display = "";
+  const lenInput = document.getElementById("fLen");
+  if (lenInput) lenInput.placeholder = "e.g. " + sp.relIn[div];
+}
+function saveCatch() {
+  const spId = document.getElementById("fSpecies").value;
+  const date = document.getElementById("fDate").value;
+  document.getElementById("errSpecies").style.display = spId ? "none" : "";
+  if (!spId || !date) return;
+
+  let totalOz = null, lengthIn = null;
+  if (category === "keep") {
+    const lb = parseFloat(document.getElementById("fLb").value) || 0;
+    const oz = parseFloat(document.getElementById("fOz").value) || 0;
+    const ok = lb > 0 || oz > 0;
+    document.getElementById("errWeight").style.display = ok ? "none" : "";
+    if (!ok) return;
+    totalOz = lb * 16 + oz;
+  } else {
+    const len = parseFloat(document.getElementById("fLen").value);
+    const ok = len > 0;
+    document.getElementById("errLen").style.display = ok ? "none" : "";
+    if (!ok) return;
+    lengthIn = Math.ceil(len * 4) / 4; // program rounds UP to nearest 1/4"
+  }
+  state.catches.unshift({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    speciesId: spId, category, date,
+    water: document.getElementById("fWater").value.trim(),
+    town: document.getElementById("fTown").value.trim(),
+    totalOz, lengthIn,
+    notes: document.getElementById("fNotes").value.trim(),
+    loggedAt: new Date().toISOString(),
+  });
+  save();
+  closeForm();
+  render();
+}
+function askDelete(id) { confirmDeleteId = id; render(); }
+function cancelDelete() { confirmDeleteId = null; render(); }
+function doDelete(id) {
+  state.catches = state.catches.filter(c => c.id !== id);
+  confirmDeleteId = null;
+  save();
+  render();
+}
+
+// ── backup ──
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "angler-logbook-backup-" + todayISO() + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importBackup(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data.catches)) throw new Error("bad format");
+      if (!confirm("Replace your current logbook (" + state.catches.length + " entries) with this backup (" + data.catches.length + " entries)?")) return;
+      state.catches = data.catches;
+      if (data.division === "adult" || data.division === "youth") state.division = data.division;
+      save();
+      render();
+    } catch (e) {
+      alert("That file doesn't look like a logbook backup.");
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = "";
+}
+
+// ── rendering ──
+function render() {
+  const div = state.division;
+  document.getElementById("btnAdult").classList.toggle("active", div === "adult");
+  document.getElementById("btnYouth").classList.toggle("active", div === "youth");
+
+  const pinnedSet = new Set();
+  state.catches.forEach(c => { if (qualifies(c, div)) pinnedSet.add(c.speciesId); });
+  const count = pinnedSet.size;
+  document.getElementById("count").textContent = count;
+  document.getElementById("barFill").style.width = Math.round(count / 24 * 100) + "%";
+  document.getElementById("champ").innerHTML = count === 24 ? '<div class="champ">🏆 All 24 species! Angler of the Year material.</div>' : "";
+
+  // best catch per species
+  const best = {};
+  state.catches.forEach(c => {
+    const m = c.category === "keep" ? (c.totalOz || 0) : (c.lengthIn || 0);
+    const cur = best[c.speciesId];
+    const curM = cur ? (cur.category === "keep" ? cur.totalOz || 0 : cur.lengthIn || 0) : -1;
+    if (!cur || (qualifies(c, div) && !qualifies(cur, div)) || (qualifies(c, div) === qualifies(cur, div) && m > curM)) best[c.speciesId] = c;
+  });
+
+  document.getElementById("board").innerHTML = SPECIES.map(sp => {
+    const earned = pinnedSet.has(sp.id);
+    const r = RECORDS[sp.id];
+    const b = best[sp.id];
+    return '<button class="chip' + (earned ? " earned" : "") + '" onclick="openForm(\'' + sp.id + '\')">'
+      + '<div class="name-row"><span class="pin" aria-hidden="true"></span><span class="sp-name">' + esc(sp.name) + '</span></div>'
+      + '<div class="mins">Keep &ge; ' + fmtWeight(sp.keepOz[div]) + '<br>Release &ge; ' + sp.relIn[div] + '&Prime;</div>'
+      + (r ? '<div class="rec">🏅 Record: ' + r.keep.lb + ' lb ' + r.keep.oz + ' oz · ' + r.rel.len + '&Prime;</div>' : "")
+      + (b ? '<div class="best">Best: ' + (b.category === "keep" ? fmtWeight(b.totalOz) : b.lengthIn + '&Prime;') + '</div>' : "")
+      + '</button>';
+  }).join("");
+
+  // populate species select once
+  const sel = document.getElementById("fSpecies");
+  if (sel.options.length <= 1) {
+    sel.innerHTML = '<option value="">Choose a species…</option>' + SPECIES.map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join("");
+  }
+
+  const sorted = [...state.catches].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  document.getElementById("logCount").textContent = state.catches.length + (state.catches.length === 1 ? " entry" : " entries");
+  document.getElementById("log").innerHTML = sorted.length === 0
+    ? '<div class="empty">No catches yet. Tap a species on the pin board or hit "Log a catch" after your next trip.</div>'
+    : sorted.map(c => {
+      const sp = SPECIES.find(s => s.id === c.speciesId);
+      const q = qualifies(c, div);
+      const dl = daysLeft(c.date);
+      const showDeadline = q && dl != null && dl >= 0 && dl <= 30;
+      const rec = beatsRecord(c);
+      return '<div class="entry' + (q ? " qualified" : "") + '">'
+        + '<div class="top"><span class="sp">' + esc(sp ? sp.name : c.speciesId) + '</span>'
+        + '<span class="badge' + (q ? " gold" : "") + '">' + (q ? "★ Bronze pin" : "Below minimum") + '</span></div>'
+        + '<div class="metric">' + (c.category === "keep" ? fmtWeight(c.totalOz) : c.lengthIn + '&Prime;') + ' · ' + (c.category === "keep" ? "Catch &amp; Keep" : "Catch &amp; Release") + '</div>'
+        + '<div class="where">' + esc(c.date) + (c.water ? ' · ' + esc(c.water) : "") + (c.town ? ', ' + esc(c.town) : "") + '</div>'
+        + (c.notes ? '<div class="notes">' + esc(c.notes) + '</div>' : "")
+        + (rec ? '<div class="record-banner">🎉 Possible STATE RECORD! ' + (c.category === "keep" ? "Keep records must be weighed whole by a MassWildlife Fisheries Biologist — email steven.mattocks@mass.gov." : "Make sure your measuring-board photo follows the official rules.") + '</div>' : "")
+        + (showDeadline ? '<div class="deadline' + (dl <= 7 ? " urgent" : "") + '">⏳ ' + (dl === 0 ? "Affidavit due today!" : dl + " day" + (dl === 1 ? "" : "s") + " left to submit your affidavit") + '</div>' : "")
+        + '<div class="actions">' + (confirmDeleteId === c.id
+            ? '<button class="danger-btn" onclick="doDelete(\'' + c.id + '\')">Delete entry</button><button class="ghost-btn" onclick="cancelDelete()">Keep it</button>'
+            : '<button class="link-btn" onclick="askDelete(\'' + c.id + '\')">Remove</button>')
+        + '</div></div>';
+    }).join("");
+}
+
+// ── init ──
+document.getElementById("yr").textContent = new Date().getFullYear();
+load();
+setCategory("release");
+document.getElementById("fDate").value = todayISO();
+render();
+</script>
+</body>
+</html>
